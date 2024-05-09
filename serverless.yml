@@ -1,0 +1,67 @@
+service: softtekChallengue
+useDotenv: true
+
+resources:
+  Resources:
+    BookTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: books
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+
+functions:
+  getBooks:
+    handler: src/model_x/getBooks.handler
+    events:
+      - httpApi: GET /api/v1/books
+  getBook:
+    handler: src/model_x/getBook.handler
+    events:
+      - httpApi: GET /api/v1/books/{id_book}
+  createBook:
+    handler: src/model_x/createBook.handler
+    events:
+      - httpApi: POST /api/v1/books
+  updateBook:
+    handler: src/model_x/updateBook.handler
+    events:
+      - httpApi: PUT /api/v1/books/{id_book}
+  deleteBook:
+    handler: src/model_x/deleteBook.handler
+    events:
+      - httpApi: DELETE /api/v1/books/{id_book}
+  # getFilmSwapi:
+  #   handler: src/swapi/getFilmHandler.handler
+  #   events:
+  #     - httpApi: GET /api/v1/swapi/films/{id_film}
+  # getFilmsSwapi:
+  #   handler: src/swapi/getFilmsHandler.handler
+  #   events:
+  #     - httpApi: GET /api/v1/swapi/films
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: 'us-east-2'
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource:
+        - Fn::GetAtt:
+            - BookTable
+            - Arn
+custom:
+  esbuild:
+    bundle: true
+    minify: true
+
+plugins:
+  - serverless-esbuild
+  - serverless-offline
